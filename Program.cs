@@ -3,7 +3,7 @@ using DelegateHomework.EventsExamples;
 
 internal class Program
 {
-    private static void Main(string[] args)
+    private async static Task Main(string[] args)
     {
         Console.WriteLine("Delegate homework");
         Console.WriteLine();
@@ -18,15 +18,28 @@ internal class Program
         Console.WriteLine("Event demonstration");
         Console.WriteLine();
 
+        CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+        CancellationToken cancellationToken = cancelTokenSource.Token;
         var currentDirectoryPath = Environment.CurrentDirectory;
         var fileProcessing = new FileProcessing(currentDirectoryPath);
         fileProcessing.FileFound += OnFileFound;
-        fileProcessing.CheckFileExistance();
+        Task task = new Task(() => fileProcessing.CheckFileExistance(cancellationToken), cancellationToken);
+        task.Start();
+
+        Console.WriteLine("Press \"Q\" to cancel checking files...");
+
+        ConsoleKey keyInfo = Console.ReadKey().Key;
+        if (keyInfo == ConsoleKey.Q)
+            cancelTokenSource.Cancel();
+
+        Console.WriteLine();
+        Console.WriteLine("End of program (Wait for Task will be aborted)");
 
         Console.ReadKey();
 
         fileProcessing.FileFound -= OnFileFound;
         fileProcessing = null;
+        cancelTokenSource.Dispose();
     }
 
     static void OnFileFound(object? sender, FileArgs e)

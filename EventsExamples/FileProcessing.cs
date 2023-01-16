@@ -9,7 +9,7 @@ public class FileProcessing
         _pathWhereFileLocated = pathWhereFileLocated;
     }
 
-    public void CheckFileExistance()
+    public void CheckFileExistance(CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(_pathWhereFileLocated) == false)
         {
@@ -32,6 +32,14 @@ public class FileProcessing
                 {
                     Console.WriteLine($"This is directory {file}");
                     Console.WriteLine();
+                }
+
+                Thread.Sleep(5000);
+
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    Console.WriteLine("Checking files procedure has been aborted");
+                    return;
                 }
             }
         }
